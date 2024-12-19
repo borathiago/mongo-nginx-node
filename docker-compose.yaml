@@ -1,0 +1,26 @@
+services:
+  nodeapp:
+    build:
+      context: ./node-app
+      dockerfile: Dockerfile
+    depends_on:
+      mongo:
+        condition: service_healthy
+    volumes:
+      - ./node-app:/app
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "8080:80"
+    volumes:
+      - ./html:/usr/share/nginx/html
+
+  mongo:
+    image: mongo:latest
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 30s
+      retries: 5
+      start_period: 10s
